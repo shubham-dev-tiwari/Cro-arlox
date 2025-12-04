@@ -22,3 +22,18 @@ export const sections = [
   { id: 8, title: "Trust & Badges", icon: Award, description: "Silent salespeople that answer objections.", metrics: ["Badge Hierarchy", "Checkout Trust", "Authority Signals"], time: "2 hours" },
   { id: 9, title: "Elite Strategies", icon: TrendingUp, description: "What the top 1% do differently.", metrics: ["Visual Excellence", "Frictionless Checkout", "Urgency Balance"], time: "Advanced" }
 ];
+
+// Map of section id -> homepage anchor id (string used after #)
+export const HOME_ANCHORS = {
+  1: "benchmarks",
+  2: "homepage-must-haves",
+  3: "collection-essentials",
+  4: "product-page-power",
+  5: "design-principles",
+  6: "theme-selection",
+  7: "app-stack-roi",
+  8: "trust-badges",
+  9: "elite-strategies"
+};
+
+export default sections;

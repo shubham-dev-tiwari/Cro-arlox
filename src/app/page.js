@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { sections } from "@/lib/sections";
+import sections, { HOME_ANCHORS } from "@/lib/sections";
 import SectionCard from "@/components/SectionCard";
 import FlipCard from "@/components/FlipCard";
 import Confetti from "@/components/Confetti";
@@ -58,6 +58,18 @@ export default function DashboardPage() {
     });
   };
 
+  // helper to open a section — prefer homepage anchor if available
+  const openSection = (s) => {
+    const anchor = HOME_ANCHORS && HOME_ANCHORS[s.id];
+    if (anchor) {
+      // go to homepage anchor
+      router.push(`/homepage#${anchor}`);
+    } else {
+      // fallback to section detail page
+      router.push(`/sections/${s.id}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-200 relative">
       <style>{`
@@ -78,7 +90,8 @@ export default function DashboardPage() {
             <a href="#hub" className="hover:text-blue-600">Hub</a>
             <a href="#roadmap" className="hover:text-blue-600">30-Day Roadmap</a>
             <a href="#tools" className="hover:text-blue-600">Tools</a>
-            <button onClick={() => router.push("/")} className="px-4 py-2 bg-blue-600 text-white rounded-full">Open Home</button>
+            {/* Open the homepage route */}
+            <button onClick={() => router.push("/homepage")} className="px-4 py-2 bg-blue-600 text-white rounded-full">Open Home</button>
           </div>
         </div>
       </nav>
@@ -96,7 +109,7 @@ export default function DashboardPage() {
             <p className="text-lg text-slate-600 max-w-xl">Master the 20% of elements that drive 80% of conversions. Click any card to open the module.</p>
 
             <div className="flex gap-4 items-center">
-              <button onClick={() => router.push("/sections/2")} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2">
+              <button onClick={() => openSection(sections.find(s => s.id === 2))} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2">
                 Homepage Must-Haves <ArrowRight size={16} />
               </button>
               <div className="px-3 py-2 bg-slate-50 rounded-lg text-sm text-slate-600">Based on 87+ Top Brands</div>
@@ -149,7 +162,7 @@ export default function DashboardPage() {
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold">Navigation Hub</h2>
-              <p className="text-slate-500">Click a card to open its page.</p>
+              <p className="text-slate-500">Click a card to open its page (we prefer homepage anchors).</p>
             </div>
             <div className="hidden md:flex items-center gap-3 text-sm text-slate-500">
               <span className="w-3 h-3 rounded-full bg-emerald-100 border border-emerald-500" /> Completed
@@ -168,7 +181,8 @@ export default function DashboardPage() {
                 metrics={s.metrics}
                 time={s.time}
                 status={s.id === 1 ? "completed" : s.id === 2 ? "in-progress" : "not-started"}
-                onClick={() => router.push(`/sections/${s.id}`)}
+                // prefer homepage anchor, fallback to section page
+                onClick={() => openSection(s)}
               />
             ))}
           </div>
