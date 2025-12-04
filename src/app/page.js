@@ -732,38 +732,89 @@ const App = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="relative w-6 h-6 flex items-center justify-center">
-                <div className="absolute inset-0 border-[2px] border-blue-500 transform rotate-0" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
-              </div>
-              <span className="font-bold text-xl text-white">Arlox<span className="text-blue-500">.io</span></span>
-            </div>
-            <p className="max-w-sm mb-6">Empowering fashion e-commerce brands with data-driven design and optimization strategies.</p>
-            <div className="text-xs text-slate-600">© 2024 Arlox.io. Internal Use Only.</div>
-          </div>
+<footer className="bg-slate-900 text-slate-400 pt-16 pb-10 border-t border-slate-800">
+  <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
 
-          <div>
-            <h4 className="text-white font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#hub" className="hover:text-blue-400">Navigation Hub</a></li>
-              <li><a href="#roadmap" className="hover:text-blue-400">Roadmap</a></li>
-              <li><a href="#tools" className="hover:text-blue-400">Calculator</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-4">Resources</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-blue-400">Shopify Theme Store</a></li>
-              <li><a href="#" className="hover:text-blue-400">Baymard Institute</a></li>
-              <li><a href="#" className="hover:text-blue-400">PageSpeed Insights</a></li>
-            </ul>
-          </div>
+    {/* Brand */}
+    <div className="md:col-span-2">
+      <div className="flex items-center gap-2 mb-6">
+        <div className="relative w-7 h-7 flex items-center justify-center">
+          <div
+            className="absolute inset-0 border-[2.5px] border-blue-500"
+            style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
+          />
         </div>
-      </footer>
+        <span className="font-bold text-2xl text-white">
+          Arlox<span className="text-blue-500">.io</span>
+        </span>
+      </div>
+
+      <p className="max-w-md leading-relaxed text-slate-400 mb-6">
+        Empowering fashion e-commerce brands with data-driven design, CRO strategies, speed optimization, and world-class conversion frameworks.
+      </p>
+
+      {/* Social Icons */}
+      <div className="flex items-center gap-4 mt-4">
+        <a href="#" className="hover:text-blue-400 transition">
+          <svg width="22" height="22" fill="currentColor">
+            <path d="M22 2.41a9.17 9.17 0..." />
+          </svg>
+        </a>
+        <a href="#" className="hover:text-blue-400 transition">
+          <svg width="22" height="22" fill="currentColor">
+            <path d="M16 8a6 6 0..." />
+          </svg>
+        </a>
+        <a href="#" className="hover:text-blue-400 transition">
+          <svg width="22" height="22" fill="currentColor">
+            <path d="M18 2H6a4..." />
+          </svg>
+        </a>
+      </div>
+
+      <div className="text-xs text-slate-500 mt-6">
+        © {new Date().getFullYear()} Arlox.io • All Rights Reserved
+      </div>
+    </div>
+
+    {/* Quick Links */}
+    <div>
+      <h4 className="text-white font-semibold mb-4 text-lg">Quick Links</h4>
+      <ul className="space-y-2 text-sm">
+        <li>
+          <a href="#hub" className="hover:text-blue-400 transition">Navigation Hub</a>
+        </li>
+        <li>
+          <a href="#roadmap" className="hover:text-blue-400 transition">30-Day Roadmap</a>
+        </li>
+        <li>
+          <a href="#tools" className="hover:text-blue-400 transition">Interactive Tools</a>
+        </li>
+        <li>
+          <a href="/sections/1" className="hover:text-blue-400 transition">Start Here</a>
+        </li>
+      </ul>
+    </div>
+
+    {/* Resources */}
+    <div>
+      <h4 className="text-white font-semibold mb-4 text-lg">Resources</h4>
+      <ul className="space-y-2 text-sm">
+        <li><a href="#" className="hover:text-blue-400 transition">Shopify Theme Store</a></li>
+        <li><a href="#" className="hover:text-blue-400 transition">Baymard Institute</a></li>
+        <li><a href="#" className="hover:text-blue-400 transition">PageSpeed Insights</a></li>
+        <li><a href="#" className="hover:text-blue-400 transition">Performance Playbooks</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  {/* Footer Bottom */}
+  <div className="mt-12 border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
+    Built with ❤️ by Arlox CRO Team
+  </div>
+</footer>
+
 
       {/* Mobile calculator toggle */}
       <div className="md:hidden fixed bottom-4 right-4 z-50">

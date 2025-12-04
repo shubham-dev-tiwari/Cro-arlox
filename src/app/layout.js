@@ -2,7 +2,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 
 export const metadata = {
-  title: 'Arlox Homepage - Ecommerce Playbook',
+  title: 'Arlox Vault - Ecommerce Playbook',
   description: 'US vs India Homepage Strategy',
 }
 
