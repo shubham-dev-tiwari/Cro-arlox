@@ -777,11 +777,11 @@ export default function ArloxBenchmarks() {
                     <div className="space-y-6">
                       <div className="flex justify-between items-center border-b border-slate-700 pb-4">
                         <span className="text-slate-400">CAC (Standard)</span>
-                        <span className="font-mono font-bold text-lg">{currentData.cost.cac}</span>
+                        <span className="font-mono font-bold text-lg text-blue-400 ">{currentData.cost.cac}</span>
                       </div>
                       <div className="flex justify-between items-center border-b border-slate-700 pb-4">
                         <span className="text-slate-400">CAC (Premium)</span>
-                        <span className="font-mono font-bold text-lg">{currentData.cost.cacPremium}</span>
+                        <span className="font-mono font-bold text-lg text-indigo-400">{currentData.cost.cacPremium}</span>
                       </div>
                       <div className="flex justify-between items-center border-b border-slate-700 pb-4">
                         <span className="text-slate-400">Lifetime Value (LTV)</span>
