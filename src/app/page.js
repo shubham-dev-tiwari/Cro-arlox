@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 // 1. Import the router hook
 import { useRouter } from "next/navigation"; 
 import {
+  Youtube, Instagram, Facebook, Linkedin,
   BookMarked,
   BarChart3,
   ShoppingBag,
@@ -380,9 +381,14 @@ const App = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 items-center">
-              <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl hover:shadow-blue-200/50 flex items-center gap-2">
-                Start 30-Day Roadmap <ArrowRight size={20} />
-              </button>
+              <button
+  onClick={() => document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+  className="px-8 py-4 bg-blue-800 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl hover:shadow-blue-200/50 flex items-center gap-2"
+  aria-controls="roadmap"
+>
+  Start 30-Day Roadmap <ArrowRight size={20} />
+</button>
+
               <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg text-sm text-slate-600">
                 <div className="flex -space-x-2">
                   {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold">A</div>)}
@@ -421,7 +427,7 @@ const App = () => {
                   <label className="text-xs font-bold text-slate-500 uppercase">Conv. Rate (%)</label>
                   <input
                     type="number"
-                    value={convRate}
+                    value={convRate===0?"":convRate}
                     step="0.1"
                     onChange={(e) => setConvRate(Number(e.target.value))}
                     className="w-full p-2 border border-slate-200 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
@@ -731,97 +737,180 @@ const App = () => {
 
       </main>
 
-      {/* Footer */}
-<footer className="bg-slate-900 text-slate-400 pt-16 pb-10 border-t border-slate-800">
-  <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+ {/* Footer */}
+<footer className="relative bg-slate-900 text-slate-400 pt-24 pb-12 border-t border-slate-800 overflow-hidden">
 
-    {/* Brand */}
-    <div className="md:col-span-2">
-      <div className="flex items-center gap-2 mb-6">
-        <div className="relative w-7 h-7 flex items-center justify-center">
-          <div
-            className="absolute inset-0 border-[2.5px] border-blue-500"
-            style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
+  {/* Ambient Glow */}
+  <div className="absolute inset-0 pointer-events-none">
+    <div className="absolute top-10 left-1/3 w-[500px] h-[500px] bg-blue-600/20 blur-[130px] rounded-full"></div>
+    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 blur-[140px] rounded-full"></div>
+  </div>
+
+  {/* Floating Wave Decorations */}
+  <div className="absolute top-0 left-0 w-full opacity-10">
+    <svg viewBox="0 0 1440 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path
+        d="M0,160 C240,80 480,80 720,140 C960,200 1200,200 1440,120 L1440,0 L0,0 Z"
+        fill="url(#gradientWave)"
+      />
+      <defs>
+        <linearGradient id="gradientWave" x1="0" x2="1">
+          <stop offset="0%" stopColor="#2563EB" />
+          <stop offset="50%" stopColor="#7C3AED" />
+          <stop offset="100%" stopColor="#0EA5E9" />
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
+
+    {/* BRAND & LOGO BLOCK */}
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 group">
+        {/* Clickable logo */}
+        <a href="https://www.arlox.io/" target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-lg ring-1 ring-white/10 group-hover:scale-105 transition-all">
+          <img
+            src="/arlox_logo_black.png"
+            alt="Arlox Logo"
+            className="object-contain w-10 h-10 opacity-95 hover:opacity-100 transition"
           />
-        </div>
-        <span className="font-bold text-2xl text-white">
-          Arlox<span className="text-blue-500">.io</span>
-        </span>
+        </a>
+
+        <a href="https://www.arlox.io/" target="_blank" rel="noopener noreferrer" className="group-hover:text-blue-400 transition">
+          <span className="font-extrabold text-3xl text-white tracking-tight">
+            Arlox<span className="text-blue-500">.io</span>
+          </span>
+        </a>
       </div>
 
-      <p className="max-w-md leading-relaxed text-slate-400 mb-6">
-        Empowering fashion e-commerce brands with data-driven design, CRO strategies, speed optimization, and world-class conversion frameworks.
+      <p className="max-w-sm text-slate-400 leading-relaxed">
+        We help fashion brands unlock 80-20 CRO improvements through world-class UX, psychology-driven design, and data-backed processes.
       </p>
 
-      {/* Social Icons */}
-      <div className="flex items-center gap-4 mt-4">
-        <a href="#" className="hover:text-blue-400 transition">
-          <svg width="22" height="22" fill="currentColor">
-            <path d="M22 2.41a9.17 9.17 0..." />
-          </svg>
+      {/* Social (lucide icons with rounded backgrounds) */}
+      <div className="flex items-center gap-3 pt-2">
+        <a
+          href="https://www.youtube.com/@arlox-io"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Arlox YouTube"
+          className="p-2 rounded-xl bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white transition-all shadow-sm hover:shadow-red-500/20"
+        >
+          <Youtube size={20} />
         </a>
-        <a href="#" className="hover:text-blue-400 transition">
-          <svg width="22" height="22" fill="currentColor">
-            <path d="M16 8a6 6 0..." />
-          </svg>
+
+        <a
+          href="https://www.instagram.com/arlox.io/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Arlox Instagram"
+          className="p-2 rounded-xl bg-slate-800 hover:bg-pink-600 text-slate-300 hover:text-white transition-all shadow-sm hover:shadow-pink-500/20"
+        >
+          <Instagram size={20} />
         </a>
-        <a href="#" className="hover:text-blue-400 transition">
-          <svg width="22" height="22" fill="currentColor">
-            <path d="M18 2H6a4..." />
-          </svg>
+
+        <a
+          href="https://www.facebook.com/arlox.io"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Arlox Facebook"
+          className="p-2 rounded-xl bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-all shadow-sm hover:shadow-blue-500/20"
+        >
+          <Facebook size={20} />
+        </a>
+
+        <a
+          href="https://www.linkedin.com/company/arlox-io"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Arlox LinkedIn"
+          className="p-2 rounded-xl bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white transition-all shadow-sm hover:shadow-sky-500/20"
+        >
+          <Linkedin size={20} />
         </a>
       </div>
 
-      <div className="text-xs text-slate-500 mt-6">
-        © {new Date().getFullYear()} Arlox.io • All Rights Reserved
+      <div className="text-xs text-slate-500 pt-4">
+        © {new Date().getFullYear()} Arlox.io • Crafted with passion
       </div>
     </div>
 
-    {/* Quick Links */}
-    <div>
-      <h4 className="text-white font-semibold mb-4 text-lg">Quick Links</h4>
-      <ul className="space-y-2 text-sm">
-        <li>
-          <a href="#hub" className="hover:text-blue-400 transition">Navigation Hub</a>
-        </li>
-        <li>
-          <a href="#roadmap" className="hover:text-blue-400 transition">30-Day Roadmap</a>
-        </li>
-        <li>
-          <a href="#tools" className="hover:text-blue-400 transition">Interactive Tools</a>
-        </li>
-        <li>
-          <a href="/sections/1" className="hover:text-blue-400 transition">Start Here</a>
-        </li>
-      </ul>
+    {/* NEWSLETTER BLOCK */}
+    <div className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+      <h3 className="text-white font-semibold flex items-center gap-3">
+        Weekly CRO Sparks
+        <span className="text-xs bg-blue-600/30 px-2 py-0.5 rounded-full border border-blue-500/40">NEW</span>
+      </h3>
+
+      <p className="text-sm text-slate-400 mt-1 mb-4">One high-impact optimization idea delivered every Friday.</p>
+
+      <div className="flex gap-2">
+        <input
+          type="email"
+          placeholder="you@brand.com"
+          className="flex-1 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+        <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-bold shadow-blue-600/30">Join</button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 pt-5 text-xs text-slate-400">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+          Avg Lift:
+          <span className="ml-auto font-mono text-emerald-400">+14%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-500 rounded-full" />
+          Trusted by:
+          <span className="ml-auto font-mono">87+ brands</span>
+        </div>
+      </div>
     </div>
 
-    {/* Resources */}
-    <div>
-      <h4 className="text-white font-semibold mb-4 text-lg">Resources</h4>
-      <ul className="space-y-2 text-sm">
-        <li><a href="#" className="hover:text-blue-400 transition">Shopify Theme Store</a></li>
-        <li><a href="#" className="hover:text-blue-400 transition">Baymard Institute</a></li>
-        <li><a href="#" className="hover:text-blue-400 transition">PageSpeed Insights</a></li>
-        <li><a href="#" className="hover:text-blue-400 transition">Performance Playbooks</a></li>
-      </ul>
-    </div>
+    {/* CTA BLOCK (Talk to Team) */}
+    <div className="p-6 rounded-xl bg-gradient-to-b from-slate-800/60 to-slate-900/40 border border-slate-700 shadow-inner">
+      <h3 className="text-white font-semibold text-lg mb-3">Want expert eyes on your store?</h3>
 
+      {/* fixed: className (not classname) */}
+      <p className="text-sm text-slate-400 mb-5">
+        Our team reviews your homepage, PDP, checkout flow & recommends the fastest 80-20 improvements.
+      </p>
+
+      <a
+        href="https://calendly.com/arlox-/strategy-call-1"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full block text-center py-3 bg-amber-500 hover:bg-amber-400 rounded-lg text-slate-900 font-extrabold text-sm tracking-wide shadow-xl hover:shadow-amber-500/20 transition active:scale-[0.98]"
+      >
+        Talk to Arlox Team →
+      </a>
+
+      <div className="text-xs text-slate-500 mt-4">
+        Avg Response: <span className="text-slate-300 font-semibold">5–15 min</span>
+      </div>
+    </div>
   </div>
 
   {/* Footer Bottom */}
-  <div className="mt-12 border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
+  <div className="mt-16 border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
     Built with ❤️ by Arlox CRO Team
   </div>
 </footer>
 
+{/* Mobile Calculator Toggle */}
+<div className="md:hidden fixed bottom-4 right-4 z-50">
+  <button
+    onClick={() => setCalculatorOpen(!calculatorOpen)}
+    className="w-14 h-14 bg-blue-600 rounded-full text-white shadow-2xl flex items-center justify-center"
+    aria-label="Open calculator"
+  >
+    <Calculator size={24} />
+  </button>
+</div>
 
-      {/* Mobile calculator toggle */}
-      <div className="md:hidden fixed bottom-4 right-4 z-50">
-        <button onClick={() => setCalculatorOpen(!calculatorOpen)} className="w-14 h-14 bg-blue-600 rounded-full text-white shadow-2xl flex items-center justify-center">
-          <Calculator size={24} />
-        </button>
-      </div>
+
+
     </div>
   );
 };
