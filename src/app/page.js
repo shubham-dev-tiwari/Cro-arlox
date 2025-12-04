@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   UserX
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 /* ---------- CONSTANTS ---------- */
 const COLORS = {
@@ -356,26 +357,7 @@ const App = () => {
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className={`fixed w-full z-40 transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"}`}>
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="relative w-8 h-8 flex items-center justify-center">
-              <div className="absolute inset-0 border-[3px] border-blue-600 transform rotate-0" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
-            </div>
-            <span className="font-bold text-2xl tracking-tight text-slate-900">Arlox<span className="text-blue-600">.io</span></span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#hub" className="hover:text-blue-600 transition-colors">Navigation Hub</a>
-            <a href="#roadmap" className="hover:text-blue-600 transition-colors">30-Day Roadmap</a>
-            <a href="#tools" className="hover:text-blue-600 transition-colors">Interactive Tools</a>
-            <button className="px-5 py-2.5 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-              Start Transformation
-            </button>
-          </div>
-        </div>
-      </nav>
+     <Navbar />
 
       {/* Hero */}
       <header className="relative pt-32 pb-24 overflow-hidden bg-white">
@@ -449,7 +431,7 @@ const App = () => {
                   <label className="text-xs font-bold text-slate-500 uppercase">AOV (₹)</label>
                   <input
                     type="number"
-                    value={aov}
+                    value={aov===0?"":aov}
                     step="100"
                     onChange={(e) => setAov(Number(e.target.value))}
                     className="w-full p-2 border border-slate-200 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
