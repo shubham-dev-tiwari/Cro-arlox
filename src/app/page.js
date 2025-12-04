@@ -1,172 +1,490 @@
-// src/app/dashboard/page.js
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import sections, { HOME_ANCHORS } from "@/lib/sections";
-import SectionCard from "@/components/SectionCard";
-import FlipCard from "@/components/FlipCard";
-import Confetti from "@/components/Confetti";
-import { Calculator, ArrowRight, PlayCircle, CheckSquare } from "lucide-react";
+import React, { useState, useEffect } from "react";
+// 1. Import the router hook
+import { useRouter } from "next/navigation"; 
+import {
+  BookMarked,
+  BarChart3,
+  ShoppingBag,
+  Layers,
+  Zap,
+  Palette,
+  Monitor,
+  Award,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  Menu,
+  X,
+  ArrowRight,
+  Share2,
+  Calculator,
+  PlayCircle,
+  CheckSquare,
+  LayoutDashboard,
+  UserX
+} from "lucide-react";
 
-export default function DashboardPage() {
+/* ---------- CONSTANTS ---------- */
+const COLORS = {
+  primary: "#2563EB",
+  primaryDark: "#1E40AF",
+  secondary: "#0F172A",
+  accent: "#3B82F6",
+  background: "#FFFFFF",
+  surface: "#F8FAFC",
+  border: "#E2E8F0",
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+};
+
+const ROADMAP_DATA = {
+  1: {
+    title: "Foundation & Trust",
+    tasks: [
+      "Install Judge.me (Free Plan)",
+      "Add Trust Badges below Add-to-Cart",
+      "Optimize Images (TinyIMG)",
+      "Create Size Guides for Apparel",
+      "Add Free Shipping Banner",
+      "Setup Welcome Email Flow",
+    ],
+  },
+  2: {
+    title: "Urgency & Automation",
+    tasks: [
+      "Setup Abandoned Cart Email Flow (3 emails)",
+      "Implement Low Stock Counter (Hurrify)",
+      "Add Exit-Intent Popup (10% Off)",
+      "Configure 'Back in Stock' Alerts",
+      "Enable SMS Recovery (Cartly/Klaviyo)",
+      "Add Countdown Timer for Sales (Generic Scarcity)",
+    ],
+  },
+  3: {
+    title: "Social Proof & Upsells",
+    tasks: [
+      "Launch Photo Review Campaign (Incentivized)",
+      "Add 'Frequently Bought Together' Widget",
+      "Setup Post-Purchase Upsell (Rebuy)",
+      "Implement 'Recently Viewed' Slider",
+      "Add 'Real-time Purchase' Notifications",
+      "Create Product Bundles (Lookbook)",
+    ],
+  },
+  4: {
+    title: "Friction & Checkout",
+    tasks: [
+      "Enable Guest Checkout (Mandatory)",
+      "Simplify Checkout Form Fields",
+      "Add Local Payment Options (UPI/Wallets)",
+      "Implement One-Click Checkout (ShopPay)",
+      "Add Security Badges to Checkout Footer",
+      "Test Site Speed (Target < 2s)",
+    ],
+  },
+};
+
+/* ---------- SMALL SUB-COMPONENTS ---------- */
+
+const Confetti = ({ active }) => {
+  if (!active) return null;
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-fall rounded-sm"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `-20px`,
+            backgroundColor: [
+              COLORS.primary,
+              COLORS.success,
+              COLORS.warning,
+            ][Math.floor(Math.random() * 3)],
+            width: `${6 + Math.random() * 8}px`,
+            height: `${6 + Math.random() * 8}px`,
+            animationDuration: `${Math.random() * 1.5 + 1.5}s`,
+            animationDelay: `${Math.random() * 0.8}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const SectionCard = ({ number, title, icon: Icon, description, metrics, time, onClick, status }) => (
+  <div
+    onClick={onClick}
+    className="group relative bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+  >
+    <div className={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl
+      ${status === "completed" ? "bg-emerald-100 text-emerald-700" :
+      status === "in-progress" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"}`}>
+      {status === "completed" ? "Completed" : status === "in-progress" ? "In Progress" : "Not Started"}
+    </div>
+
+    <div className="flex justify-between items-start mb-4 mt-2">
+      <div className="p-3 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+        <Icon size={28} />
+      </div>
+      <span className="text-xs font-bold text-slate-300 group-hover:text-slate-400">SEC {number}</span>
+    </div>
+
+    <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{title}</h3>
+
+    <div className="bg-amber-50 border-l-2 border-amber-400 p-2 mb-4">
+      <p className="text-xs text-amber-900 font-medium italic">Why It Matters: {description}</p>
+    </div>
+
+    <div className="space-y-3">
+      {metrics.map((m, i) => (
+        <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          {m}
+        </div>
+      ))}
+    </div>
+
+    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+      <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+        <Clock size={12} /> {time}
+      </span>
+      <span className="text-sm font-bold text-blue-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+        Explore <ArrowRight size={14} />
+      </span>
+    </div>
+  </div>
+);
+
+const FlipCard = ({ title, icon, content, example }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  return (
+    <div
+      className="relative w-full h-64 perspective-1000 group cursor-pointer"
+      onMouseEnter={() => setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <div className={`relative w-full h-full transition-all duration-700 transform-style-3d ${isFlipped ? "rotate-y-180" : ""}`}>
+        <div className="absolute w-full h-full backface-hidden bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md">
+          <div className="mb-4 p-4 bg-blue-50 rounded-full text-blue-600 text-4xl">
+            {icon}
+          </div>
+          <h3 className="text-xl font-bold text-slate-900">{title}</h3>
+          <p className="text-slate-500 text-sm mt-2">Hover to reveal principle</p>
+        </div>
+
+        <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-slate-900 text-white rounded-xl p-6 flex flex-col justify-center shadow-xl">
+          <h4 className="font-bold text-blue-400 mb-2 text-sm uppercase tracking-wide">Psychology Principle</h4>
+          <p className="text-sm mb-4 leading-relaxed">{content}</p>
+          <div className="bg-slate-800 p-3 rounded text-xs border border-slate-700">
+            <span className="text-emerald-400 font-bold block mb-1">Real World Example:</span>
+            "{example}"
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/* ---------- MAIN APP ---------- */
+
+const App = () => {
+  // 2. Initialize the Router
   const router = useRouter();
 
-  // small app state for widgets
+  const [scrolled, setScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("visual");
+  const [activeWeek, setActiveWeek] = useState(1);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+
   const [traffic, setTraffic] = useState(10000);
   const [convRate, setConvRate] = useState(2.0);
   const [aov, setAov] = useState(2000);
-  const [activeTab, setActiveTab] = useState("visual");
-  const [activeWeek, setActiveWeek] = useState(1);
   const [reviewCount, setReviewCount] = useState(50);
   const [frictionToggle, setFrictionToggle] = useState({ guest: false, autoFill: false, minimal: false });
+
   const [checklist, setChecklist] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // derived
-  const currentRevenue = Math.round(traffic * (convRate / 100) * aov);
-  const projectedRevenue = Math.round(traffic * ((convRate + 1.5) / 100) * aov);
-  const lift = Math.max(0, projectedRevenue - currentRevenue);
+  const currentRevenue = traffic * (convRate / 100) * aov;
+  const projectedRevenue = traffic * ((convRate + 1.5) / 100) * aov;
+  const lift = Math.max(0, Math.round(projectedRevenue - currentRevenue));
+
   const reviewImpact = reviewCount < 10 ? 0 : reviewCount < 50 ? 1.5 : reviewCount < 100 ? 2.8 : 4.2;
   const frictionTime = 120 - (frictionToggle.guest ? 45 : 0) - (frictionToggle.autoFill ? 20 : 0) - (frictionToggle.minimal ? 15 : 0);
 
-  // checklist persistence
-  const STORAGE_KEY = "arlox.checklist.v1";
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try { setChecklist(JSON.parse(raw)); } catch (e) { /* ignore */ }
-    }
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(checklist));
-  }, [checklist]);
-
-  useEffect(() => {
-    // small confetti auto-off safety (in case toggled)
-    if (showConfetti) {
-      const t = setTimeout(() => setShowConfetti(false), 1800);
-      return () => clearTimeout(t);
-    }
-  }, [showConfetti]);
 
   const toggleTask = (id) => {
-    setChecklist(prev => {
+    setChecklist((prev) => {
       const newState = { ...prev, [id]: !prev[id] };
-      if (!prev[id]) setShowConfetti(true);
+      if (!prev[id]) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 1800);
+      }
       return newState;
     });
   };
 
-  // helper to open a section — prefer homepage anchor if available
-  const openSection = (s) => {
-    const anchor = HOME_ANCHORS && HOME_ANCHORS[s.id];
-    if (anchor) {
-      // go to homepage anchor
-      router.push(`/homepage#${anchor}`);
-    } else {
-      // fallback to section detail page
-      router.push(`/sections/${s.id}`);
-    }
-  };
+  // 3. Updated Sections Array with 'path' properties
+  const sections = [
+    { 
+      id: 1, 
+      title: "Critical Benchmarks", 
+      path: "/benchmarks", // Route path
+      icon: BarChart3, 
+      description: "You can't optimize what you don't measure.", 
+      metrics: ["US Conv: 2.9-3.3%", "India Conv: 1.8-2.4%", "Page Speed Targets"], 
+      time: "2-3 hours" 
+    },
+    { 
+      id: 2, 
+      title: "Homepage Must-Haves", 
+      path: "/homepage-essentials",
+      icon: Monitor, 
+      description: "3-5 seconds to build trust or lose them.", 
+      metrics: ["Hero Clarity Test", "Sticky Nav Logic", "Trust Signal Placement"], 
+      time: "4-6 hours" 
+    },
+    { 
+      id: 3, 
+      title: "Collection Essentials", 
+      path: "/collection-strategy",
+      icon: Layers, 
+      description: "Friction here kills 40% of conversions.", 
+      metrics: ["Filter Strategy", "Grid Density (US vs IN)", "Quick View Logic"], 
+      time: "5-8 hours" 
+    },
+    { 
+      id: 4, 
+      title: "Product Page Power", 
+      path: "/product-page-optimization",
+      icon: ShoppingBag, 
+      description: "Your digital salesperson.", 
+      metrics: ["8-12 Image Rule", "Size Guide Strategy", "Objection Handling"], 
+      time: "8-10 hours" 
+    },
+    { 
+      id: 5, 
+      title: "Design Principles", 
+      path: "/design-principles",
+      icon: Palette, 
+      description: "Design is not decoration; it's engineering.", 
+      metrics: ["48px Touch Targets", "Visual Hierarchy", "Color Psychology"], 
+      time: "Ongoing" 
+    },
+    { 
+      id: 6, 
+      title: "Theme Selection", 
+      path: "/theme-selection",
+      icon: LayoutDashboard, 
+      description: "The foundation of performance.", 
+      metrics: ["Turbo vs Prestige", "Mobile-First Logic", "Speed Optimization"], 
+      time: "2-4 hours" 
+    },
+    { 
+      id: 7, 
+      title: "App Stack ROI", 
+      path: "/app-stack",
+      icon: Zap, 
+      description: "Revenue multipliers, not expenses.", 
+      metrics: ["Reviews (Judge.me)", "Urgency (Hurrify)", "Email (Klaviyo)"], 
+      time: "4-6 hours" 
+    },
+    { 
+      id: 8, 
+      title: "Trust & Badges", 
+      path: "/trust-signals",
+      icon: Award, 
+      description: "Silent salespeople that answer objections.", 
+      metrics: ["Badge Hierarchy", "Checkout Trust", "Authority Signals"], 
+      time: "2 hours" 
+    },
+    { 
+      id: 9, 
+      title: "Elite Strategies", 
+      path: "/elite-strategies",
+      icon: TrendingUp, 
+      description: "What the top 1% do differently.", 
+      metrics: ["Visual Excellence", "Frictionless Checkout", "Urgency Balance"], 
+      time: "Advanced" 
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-200 relative">
+
       <style>{`
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
+        .rotate-y-180 > .backface-hidden { backface-visibility: hidden; }
+        .animate-fall { animation-name: confettiFall; animation-timing-function: linear; animation-iteration-count: 1; }
+        @keyframes confettiFall {
+          0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(110vh) rotate(360deg); opacity: 0.9; }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {/* Top nav (simple) */}
-      <nav className="fixed w-full z-40 bg-white/90 backdrop-blur-md shadow-sm py-3">
+      {/* Sticky Bookmark / Share Bar */}
+      <div className="fixed top-24 right-0 z-50 flex flex-col gap-2 p-2">
+        <button
+          onClick={() => { alert("Page Bookmarked!"); }}
+          className="bg-white p-3 rounded-l-xl shadow-lg border-y border-l border-slate-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
+          title="Bookmark this page"
+        >
+          <BookMarked size={20} className="text-slate-600 group-hover:text-blue-600" />
+        </button>
+        <button
+          onClick={() => { navigator.clipboard?.writeText(location.href); alert("Link copied to clipboard!"); }}
+          className="bg-white p-3 rounded-l-xl shadow-lg border-y border-l border-slate-200 hover:bg-blue-50 hover:text-blue-600 transition-all group"
+          title="Share with team"
+        >
+          <Share2 size={20} className="text-slate-600 group-hover:text-blue-600" />
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <nav className={`fixed w-full z-40 transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-600" />
-            <span className="font-bold text-lg">Arlox Dashboard</span>
+          <div className="flex items-center gap-2">
+            <div className="relative w-8 h-8 flex items-center justify-center">
+              <div className="absolute inset-0 border-[3px] border-blue-600 transform rotate-0" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
+            </div>
+            <span className="font-bold text-2xl tracking-tight text-slate-900">Arlox<span className="text-blue-600">.io</span></span>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <a href="#hub" className="hover:text-blue-600">Hub</a>
-            <a href="#roadmap" className="hover:text-blue-600">30-Day Roadmap</a>
-            <a href="#tools" className="hover:text-blue-600">Tools</a>
-            {/* Open the homepage route */}
-            <button onClick={() => router.push("/homepage")} className="px-4 py-2 bg-blue-600 text-white rounded-full">Open Home</button>
+
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+            <a href="#hub" className="hover:text-blue-600 transition-colors">Navigation Hub</a>
+            <a href="#roadmap" className="hover:text-blue-600 transition-colors">30-Day Roadmap</a>
+            <a href="#tools" className="hover:text-blue-600 transition-colors">Interactive Tools</a>
+            <button className="px-5 py-2.5 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              Start Transformation
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <header className="relative pt-28 pb-12 bg-white">
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-widest">
+      <header className="relative pt-32 pb-24 overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-transparent to-transparent opacity-50"></div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="text-left space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-widest">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
               Interactive CRO Blueprint
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-extrabold">Your 80-20 Fashion <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">E-commerce Playbook</span></h1>
+            <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight">
+              Your 80-20 Fashion <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">E-commerce Playbook</span>
+            </h1>
 
-            <p className="text-lg text-slate-600 max-w-xl">Master the 20% of elements that drive 80% of conversions. Click any card to open the module.</p>
+            <p className="text-xl text-slate-500 max-w-xl leading-relaxed">
+              Master the 20% of elements that drive 80% of conversions. An interactive command center for Arlox brands.
+            </p>
 
-            <div className="flex gap-4 items-center">
-              <button onClick={() => openSection(sections.find(s => s.id === 2))} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2">
-                Homepage Must-Haves <ArrowRight size={16} />
+            <div className="flex flex-wrap gap-4 items-center">
+              <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl hover:shadow-blue-200/50 flex items-center gap-2">
+                Start 30-Day Roadmap <ArrowRight size={20} />
               </button>
-              <div className="px-3 py-2 bg-slate-50 rounded-lg text-sm text-slate-600">Based on 87+ Top Brands</div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg text-sm text-slate-600">
+                <div className="flex -space-x-2">
+                  {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold">A</div>)}
+                </div>
+                Based on 87+ Top Brands
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg flex items-center gap-2"><Calculator size={18} /> Potential Impact</h3>
-              <span className="text-xs font-mono text-slate-400">LIVE CALC</span>
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-8 transform rotate-1 hover:rotate-0 transition-transform duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Calculator className="text-blue-600" size={20} />
+                Potential Impact
+              </h3>
+              <span className="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-1 rounded">LIVE CALC</span>
             </div>
 
-            <div className="space-y-4">
-              <div>
+            <div className="space-y-6">
+              <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase">Monthly Visitors</label>
-                <input type="range" min="1000" max="100000" step="1000" value={traffic} onChange={(e) => setTraffic(Number(e.target.value))} className="w-full" />
-                <div className="text-right font-mono font-bold">{traffic.toLocaleString()}</div>
+                <input
+                  type="range"
+                  min="1000"
+                  max="100000"
+                  step="1000"
+                  value={traffic}
+                  onChange={(e) => setTraffic(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <div className="text-right font-mono font-bold text-slate-900">{traffic.toLocaleString()}</div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase">Conv. Rate (%)</label>
-                  <input type="number" value={convRate} step="0.1" onChange={(e) => setConvRate(Number(e.target.value))} className="w-full p-2 border rounded" />
+                  <input
+                    type="number"
+                    value={convRate}
+                    step="0.1"
+                    onChange={(e) => setConvRate(Number(e.target.value))}
+                    className="w-full p-2 border border-slate-200 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase">AOV (₹)</label>
-                  <input type="number" value={aov} step="100" onChange={(e) => setAov(Number(e.target.value))} className="w-full p-2 border rounded" />
+                  <input
+                    type="number"
+                    value={aov}
+                    step="100"
+                    onChange={(e) => setAov(Number(e.target.value))}
+                    className="w-full p-2 border border-slate-200 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
                 </div>
               </div>
 
-              <div className="pt-4 border-t">
-                <div className="flex justify-between items-end">
+              <div className="pt-6 border-t border-slate-100">
+                <div className="flex justify-between items-end mb-2">
                   <span className="text-sm text-slate-500">Projected Monthly Lift</span>
                   <span className="text-2xl font-bold text-emerald-600">+₹{lift.toLocaleString()}</span>
                 </div>
-                <div className="w-full bg-slate-100 h-3 rounded-full mt-2 overflow-hidden">
-                  <div className="h-full bg-blue-600" style={{ width: `${Math.min(100, Math.round((lift / Math.max(1, currentRevenue)) * 100))}%` }} />
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-600 w-[60%] animate-pulse"></div>
                 </div>
-                <p className="text-xs text-center mt-2 text-slate-400">By optimizing conversion from {convRate}% to {(convRate + 1.5).toFixed(1)}%</p>
+                <p className="text-xs text-center mt-3 text-slate-400">By optimizing from {convRate}% to {(convRate + 1.5).toFixed(1)}%</p>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-6 py-16 space-y-20">
-        {/* Hub */}
+      {/* MAIN */}
+      <main className="max-w-7xl mx-auto px-6 py-20 space-y-32">
+
+        {/* HUB */}
         <section id="hub">
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="text-2xl font-bold">Navigation Hub</h2>
-              <p className="text-slate-500">Click a card to open its page (we prefer homepage anchors).</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Navigation Hub</h2>
+              <p className="text-slate-500 max-w-2xl">The comprehensive breakdown. Click a card to dive deep into specific modules.</p>
             </div>
-            <div className="hidden md:flex items-center gap-3 text-sm text-slate-500">
-              <span className="w-3 h-3 rounded-full bg-emerald-100 border border-emerald-500" /> Completed
-              <span className="w-3 h-3 rounded-full bg-blue-100 border border-blue-500" /> In Progress
+            <div className="hidden md:flex items-center gap-2 text-sm text-slate-400">
+              <span className="w-3 h-3 rounded-full bg-emerald-100 border border-emerald-500"></span> Completed
+              <span className="w-3 h-3 rounded-full bg-blue-100 border border-blue-500 ml-3"></span> In Progress
             </div>
           </div>
 
@@ -181,56 +499,64 @@ export default function DashboardPage() {
                 metrics={s.metrics}
                 time={s.time}
                 status={s.id === 1 ? "completed" : s.id === 2 ? "in-progress" : "not-started"}
-                // prefer homepage anchor, fallback to section page
-                onClick={() => openSection(s)}
+                // 4. Update OnClick to push to the path defined in the data
+                onClick={() => router.push(s.path)}
               />
             ))}
           </div>
         </section>
 
-        {/* Roadmap */}
-        <section id="roadmap" className="bg-slate-900 rounded-2xl p-8 text-white">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold">30-Day Execution Roadmap</h2>
-              <p className="text-slate-300">Follow the sequence — don't do everything at once.</p>
+        {/* ROADMAP */}
+        <section id="roadmap" className="bg-slate-900 rounded-3xl p-8 md:p-12 text-white overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">30-Day Execution Roadmap</h2>
+                <p className="text-slate-400">Don't do everything at once. Follow the sequence.</p>
+              </div>
+              <div className="bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm border border-white/10 text-sm font-mono">
+                Week {activeWeek}: {ROADMAP_DATA[activeWeek].title}
+              </div>
             </div>
-            <div className="bg-white/10 px-3 py-2 rounded font-mono">Week {activeWeek}</div>
-          </div>
 
-          <div className="mb-6">
-            <div className="relative mb-8">
-              <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 bg-slate-700 rounded-full"></div>
+            <div className="relative mb-16">
+              <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-700 -translate-y-1/2 rounded-full"></div>
               <div className="relative z-10 grid grid-cols-4 gap-4">
-                {[{week:1,title:"Foundation"},{week:2,title:"Urgency"},{week:3,title:"Social Proof"},{week:4,title:"Checkout"}].map(w => (
-                  <div key={w.week} onClick={() => setActiveWeek(w.week)} className="flex flex-col items-center cursor-pointer">
-                    <div className={`w-12 h-12 rounded-full border-4 flex items-center justify-center font-bold text-white shadow-lg ${w.week === activeWeek ? "scale-110 ring-4 ring-white/20 bg-blue-500 border-blue-500" : "bg-slate-900 border-slate-700"}`}>{w.week}</div>
-                    <div className={`mt-3 text-sm ${w.week === activeWeek ? "text-white" : "text-slate-400"}`}>Week {w.week}</div>
-                    <div className="text-xs text-slate-400">{w.title}</div>
+                {[
+                  { week: 1, title: "Foundation", color: "bg-emerald-500", border: "border-emerald-500" },
+                  { week: 2, title: "Urgency", color: "bg-blue-500", border: "border-blue-500" },
+                  { week: 3, title: "Social Proof", color: "bg-amber-500", border: "border-amber-500" },
+                  { week: 4, title: "Checkout", color: "bg-purple-500", border: "border-purple-500" }
+                ].map((w) => (
+                  <div key={w.week} onClick={() => setActiveWeek(w.week)} className="flex flex-col items-center cursor-pointer group">
+                    <div className={`w-12 h-12 rounded-full border-4 ${w.week === activeWeek ? "scale-125 ring-4 ring-white/20" : ""} ${w.border} ${w.week === activeWeek ? w.color : "bg-slate-900"} flex items-center justify-center font-bold text-white shadow-lg z-10 transition-all duration-300`}>
+                      {w.week}
+                    </div>
+                    <div className="mt-4 text-center">
+                      <h4 className={`font-bold transition-colors ${w.week === activeWeek ? "text-white" : "text-slate-500 group-hover:text-slate-300"}`}>Week {w.week}</h4>
+                      <span className={`text-xs uppercase tracking-wider ${w.week === activeWeek ? "text-blue-300" : "text-slate-600"}`}>{w.title}</span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold flex items-center gap-2"><CheckSquare className="text-emerald-400" /> Week {activeWeek} Tasks</h3>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md" key={activeWeek}>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-3"><CheckSquare className="text-emerald-400" /> Week {activeWeek} Tasks</h3>
                 <Confetti active={showConfetti} />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                {({
-                  1: ["Install Judge.me (Free Plan)", "Add Trust Badges below Add-to-Cart", "Optimize Images (TinyIMG)", "Create Size Guides for Apparel", "Add Free Shipping Banner", "Setup Welcome Email Flow"],
-                  2: ["Setup Abandoned Cart Email Flow (3 emails)", "Implement Low Stock Counter (Hurrify)", "Add Exit-Intent Popup (10% Off)", "Configure 'Back in Stock' Alerts", "Enable SMS Recovery (Cartly/Klaviyo)", "Add Countdown Timer for Sales (Generic Scarcity)"],
-                  3: ["Launch Photo Review Campaign (Incentivized)", "Add 'Frequently Bought Together' Widget", "Setup Post-Purchase Upsell (Rebuy)", "Implement 'Recently Viewed' Slider", "Add 'Real-time Purchase' Notifications", "Create Product Bundles (Lookbook)"],
-                  4: ["Enable Guest Checkout (Mandatory)", "Simplify Checkout Form Fields", "Add Local Payment Options (UPI/Wallets)", "Implement One-Click Checkout (ShopPay)", "Add Security Badges to Checkout Footer", "Test Site Speed (Target < 2s)"]
-                }[activeWeek] || []).map((task, i) => {
-                  const id = `w${activeWeek}-t${i}`;
-                  const done = !!checklist[id];
+                {ROADMAP_DATA[activeWeek].tasks.map((task, i) => {
+                  const taskId = `w${activeWeek}-t${i}`;
                   return (
-                    <div key={id} onClick={() => { setChecklist(prev => ({ ...prev, [id]: !prev[id] })); if (!done) setShowConfetti(true); }} className={`p-4 rounded-xl border cursor-pointer flex items-center gap-4 ${done ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-200" : "bg-slate-800 border-slate-700 text-slate-300"}`}>
-                      <div className={`w-6 h-6 rounded flex items-center justify-center ${done ? "bg-emerald-500 text-white" : "border-slate-500"}`}>{done ? "✓" : ""}</div>
-                      <div className={done ? "line-through opacity-70" : ""}>{task}</div>
+                    <div key={taskId} onClick={() => toggleTask(taskId)} className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${checklist[taskId] ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-200" : "bg-slate-800 border-slate-700 hover:bg-slate-750 text-slate-300"}`}>
+                      <div className={`w-6 h-6 rounded border flex items-center justify-center flex-shrink-0 ${checklist[taskId] ? "bg-emerald-500 border-emerald-500" : "border-slate-500"}`}>
+                        {checklist[taskId] && <CheckCircle2 size={16} className="text-white" />}
+                      </div>
+                      <span className={checklist[taskId] ? "line-through opacity-70" : ""}>{task}</span>
                     </div>
                   );
                 })}
@@ -239,97 +565,170 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Tools: Tabs */}
+        {/* TOOLS / TABS */}
         <section id="tools">
-          <div className="bg-white border rounded-2xl p-6">
-            <div className="flex border-b">
-              {["visual", "trust", "friction"].map(tab => (
-                <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 py-3 text-sm font-bold ${activeTab === tab ? "text-blue-600 border-b-2 border-blue-600" : "text-slate-400 hover:bg-slate-50"}`}>{tab === "visual" ? "Visual" : tab === "trust" ? "Trust" : "Friction"}</button>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Top Performers Showcase</h2>
+            <p className="text-slate-500">Interactive comparison: Average vs. Elite.</p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-lg">
+            <div className="flex border-b border-slate-100 overflow-x-auto">
+              {["visual", "trust", "friction"].map((tab) => (
+                <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 min-w-[150px] py-4 text-sm font-bold uppercase tracking-wider transition-colors ${activeTab === tab ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600" : "text-slate-400 hover:bg-slate-50"}`}>
+                  {tab === "visual" ? "Visual Excellence" : tab === "trust" ? "Trust Maximization" : "Friction Reduction"}
+                </button>
               ))}
             </div>
 
-            <div className="p-6">
+            <div className="p-8 min-h-[400px] bg-slate-50">
+              {/* TAB: VISUAL */}
               {activeTab === "visual" && (
-                <div className="grid md:grid-cols-2 gap-6 items-center">
-                  <div>
-                    <h3 className="text-xl font-bold">Conversion Impact of Imagery</h3>
-                    <p className="text-slate-600">Elite brands provide a "tactile" visual experience — lifestyle + closeups.</p>
-                    <div className="mt-4 space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <strong>Average</strong>
-                        <p className="text-sm text-slate-500">Few images, plain background.</p>
-                      </div>
-                      <div className="p-4 border rounded-lg bg-blue-50">
-                        <strong>Elite</strong>
-                        <p className="text-sm text-slate-500">8–12 images + video, model stats, fabric closeups.</p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-6">
+                    <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full uppercase">Why it matters</div>
+                    <h3 className="text-2xl font-bold text-slate-900">Conversion Impact of Imagery</h3>
+                    <p className="text-slate-600 leading-relaxed">Customers cannot touch the product. Your images must bridge that gap. Elite brands provide a "Tactile" visual experience.</p>
 
-                  <div className="p-4 border rounded-lg">
-                    <div className="aspect-[4/3] bg-slate-100 rounded-lg mb-4 flex items-center justify-center">
-                      <div className="text-center">
-                        <PlayCircle size={48} className="opacity-80" />
-                        <div className="font-bold mt-2">Video is non-negotiable</div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-xs text-slate-500"><span>Source: Arlox</span><span className="text-emerald-600 font-bold">Impact: +12% Add to Cart</span></div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "trust" && (
-                <div className="text-center">
-                  <h3 className="text-xl font-bold">Review Volume Simulator</h3>
-                  <div className="bg-white p-6 rounded mt-6 max-w-2xl mx-auto">
-                    <div className="flex items-center justify-center gap-6 mb-4">
-                      <div className="text-right">
-                        <div className="text-xs uppercase text-slate-400">Review Count</div>
-                        <div className="text-3xl font-bold">{reviewCount}</div>
-                      </div>
-                      <div className="text-left">
-                        <div className="text-xs uppercase text-slate-400">Avg Conv.</div>
-                        <div className={`text-3xl font-black ${reviewImpact > 3 ? "text-emerald-500" : reviewImpact > 2 ? "text-blue-500" : "text-amber-500"}`}>{reviewImpact}%</div>
-                      </div>
-                    </div>
-                    <input type="range" min="0" max="200" value={reviewCount} onChange={(e) => setReviewCount(Number(e.target.value))} className="w-full" />
-                    <div className="mt-4 text-sm text-slate-500">
-                      {reviewCount < 10 ? "Fewer than 10 reviews suppresses conversion." : reviewCount < 50 ? "Basic trust established." : reviewCount < 100 ? "Social proof kicking in." : "Elite trust achieved."}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "friction" && (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-xl font-bold">Checkout Friction Calculator</h3>
-                    <p className="text-slate-600">Toggles to reduce checkout time and abandonment.</p>
-
-                    <div className="mt-6 space-y-4">
-                      {[
-                        { key: "guest", label: "Enable Guest Checkout" },
-                        { key: "autoFill", label: "Address Auto-complete" },
-                        { key: "minimal", label: "Minimal Header/Footer" }
-                      ].map(item => (
-                        <div key={item.key} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="font-bold">{item.label}</div>
-                          <button onClick={() => setFrictionToggle(p => ({ ...p, [item.key]: !p[item.key] }))} className={`w-12 h-6 rounded-full p-1 ${frictionToggle[item.key] ? "bg-emerald-500" : "bg-slate-300"}`}>
-                            <div className={`w-4 h-4 rounded-full bg-white transition-transform ${frictionToggle[item.key] ? "translate-x-6" : ""}`} />
-                          </button>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-4 p-4 bg-white rounded-lg border border-slate-200">
+                        <div className="w-8 h-8 rounded-full bg-red-100 text-red-500 flex items-center justify-center font-bold">X</div>
+                        <div>
+                          <h4 className="font-bold text-slate-800">The "Average" Mistake</h4>
+                          <p className="text-sm text-slate-500">3-4 images, white background only. No context, no texture detail. Returns are 40% higher.</p>
                         </div>
-                      ))}
+                      </div>
+                      <div className="flex items-start gap-4 p-4 bg-white rounded-lg border border-blue-200 shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center font-bold">✓</div>
+                        <div>
+                          <h4 className="font-bold text-slate-800">The "Elite" Standard</h4>
+                          <p className="text-sm text-slate-500">8-12 images + Video. Lifestyle shots, fabric closeups, model stats. Conversion +30%.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-slate-900 text-white p-6 rounded-2xl text-center">
-                    <div className="text-sm uppercase text-slate-400">Est. Time to Complete</div>
-                    <div className="my-4">
-                      <div className="text-4xl font-mono font-bold">{frictionTime}s</div>
-                      <div className="text-xs text-slate-400">Industry Avg: 120s</div>
+                  <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <div className="aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden relative mb-4">
+                      <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-white">
+                        <div className="text-center">
+                          <PlayCircle size={48} className="mx-auto mb-2 opacity-80" />
+                          <span className="font-bold">VIDEO IS NON-NEGOTIABLE</span>
+                          <p className="text-sm opacity-70">80% of top brands use video on PDP</p>
+                        </div>
+                      </div>
                     </div>
+                    <div className="flex justify-between text-xs font-mono text-slate-500">
+                      <span>Source: Arlox Internal Data</span>
+                      <span className="text-emerald-600 font-bold">Impact: +12% Add to Cart</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: TRUST */}
+              {activeTab === "trust" && (
+                <div>
+                  <div className="text-center max-w-2xl mx-auto mb-10">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2">The Review Volume Simulator</h3>
+                    <p className="text-slate-600">Drag the slider to see how review count correlates with conversion rate.</p>
+                  </div>
+
+                  <div className="bg-white p-10 rounded-2xl border border-slate-200 text-center max-w-3xl mx-auto shadow-sm">
+                    <div className="flex items-center justify-center gap-4 mb-8">
+                      <div className="text-right">
+                        <div className="text-sm text-slate-400 font-bold uppercase">Review Count</div>
+                        <div className="text-3xl font-bold text-slate-900">{reviewCount}</div>
+                      </div>
+                      <ArrowRight className="text-slate-300" />
+                      <div className="text-left">
+                        <div className="text-sm text-slate-400 font-bold uppercase">Avg. Conversion</div>
+                        <div className={`text-5xl font-black transition-colors duration-300 ${reviewImpact > 3 ? "text-emerald-500" : reviewImpact > 2 ? "text-blue-500" : "text-amber-500"}`}>
+                          {reviewImpact}%
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative pt-6 pb-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="200"
+                        value={reviewCount}
+                        onChange={(e) => setReviewCount(Number(e.target.value))}
+                        className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <div className="flex justify-between text-xs text-slate-400 mt-2 font-mono uppercase">
+                        <span>Launch (0)</span>
+                        <span>Growth (50)</span>
+                        <span>Scale (100+)</span>
+                        <span>Elite (200+)</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 p-4 bg-slate-50 rounded-lg border border-slate-100 text-sm text-slate-600">
+                      {reviewCount < 10 && "🚫 Fewer than 10 reviews creates 'Ghost Town' syndrome. Conversion is suppressed."}
+                      {reviewCount >= 10 && reviewCount < 50 && "⚠️ Basic trust established. Conversion baseline reached."}
+                      {reviewCount >= 50 && reviewCount < 100 && "✅ Social proof kicking in. Expect ~15% lift in conversion."}
+                      {reviewCount >= 100 && "🔥 Elite Trust. 'Bandwagon Effect' drives impulse purchases."}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: FRICTION */}
+              {activeTab === "friction" && (
+                <div className="grid md:grid-cols-2 gap-12 items-start">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4">Checkout Friction Calculator</h3>
+                    <p className="text-slate-600 mb-6">Every second spent in checkout increases abandonment probability. Use the toggles to see how optimizing the flow saves time.</p>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <UserX className="text-blue-500" />
+                          <span className="font-bold text-slate-700">Enable Guest Checkout</span>
+                        </div>
+                        <button onClick={() => setFrictionToggle(p => ({...p, guest: !p.guest}))} className={`w-12 h-6 rounded-full p-1 transition-colors ${frictionToggle.guest ? "bg-emerald-500" : "bg-slate-300"}`}>
+                          <div className={`w-4 h-4 rounded-full bg-white transition-transform ${frictionToggle.guest ? "translate-x-6" : ""}`} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Zap className="text-amber-500" />
+                          <span className="font-bold text-slate-700">Address Auto-Complete</span>
+                        </div>
+                        <button onClick={() => setFrictionToggle(p => ({...p, autoFill: !p.autoFill}))} className={`w-12 h-6 rounded-full p-1 transition-colors ${frictionToggle.autoFill ? "bg-emerald-500" : "bg-slate-300"}`}>
+                          <div className={`w-4 h-4 rounded-full bg-white transition-transform ${frictionToggle.autoFill ? "translate-x-6" : ""}`} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <LayoutDashboard className="text-purple-500" />
+                          <span className="font-bold text-slate-700">Minimal Header/Footer</span>
+                        </div>
+                        <button onClick={() => setFrictionToggle(p => ({...p, minimal: !p.minimal}))} className={`w-12 h-6 rounded-full p-1 transition-colors ${frictionToggle.minimal ? "bg-emerald-500" : "bg-slate-300"}`}>
+                          <div className={`w-4 h-4 rounded-full bg-white transition-transform ${frictionToggle.minimal ? "translate-x-6" : ""}`} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900 text-white p-8 rounded-2xl text-center shadow-xl">
+                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Est. Time to Complete</div>
+                    <div className="relative w-48 h-48 mx-auto mb-6 flex items-center justify-center">
+                      <div className="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                      <div className="absolute inset-0 border-4 border-emerald-500 rounded-full transition-all duration-700" style={{ clipPath: `polygon(0 0, 100% 0, 100% ${frictionTime}%, 0 ${frictionTime}%)` }} />
+                      <div>
+                        <div className="text-5xl font-mono font-bold">{frictionTime}s</div>
+                        <div className="text-xs text-slate-500">Industry Avg: 120s</div>
+                      </div>
+                    </div>
+
                     <div className="text-emerald-400 font-bold">You saved {120 - frictionTime} seconds!</div>
-                    <div className="text-xs text-slate-400 mt-2">Impact: ~{Math.round((120 - frictionTime) * 0.5)}% decrease in abandonment</div>
+                    <p className="text-xs text-slate-500 mt-2">Impact: ~{Math.round((120 - frictionTime) * 0.5)}% decrease in abandonment</p>
                   </div>
                 </div>
               )}
@@ -337,22 +736,61 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Psychology */}
+        {/* PSYCHOLOGY */}
         <section>
-          <h2 className="text-2xl font-bold mb-6">Conversion Psychology</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-8">Conversion Psychology</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FlipCard title="Social Proof" icon="👥" content="People assume others' actions are correct. Reduces uncertainty." example='"Priya from Mumbai bought this 2h ago"' />
-            <FlipCard title="Scarcity (FOMO)" icon="🔥" content="Items feel more valuable when scarce." example='"Only 3 left in Size M"' />
-            <FlipCard title="Loss Aversion" icon="📉" content="The pain of loss often outweighs the pleasure of gain." example='"Save ₹1,050" vs "20% Off"' />
-            <FlipCard title="Paradox of Choice" icon="😵‍💫" content="Too many options cause decision paralysis." example='Show 3 recommended vs 20' />
+            <FlipCard title="Social Proof" icon="👥" content="People assume the actions of others reflect the correct behavior for a given situation. Reduces uncertainty." example='"Priya from Mumbai bought this 2h ago"' />
+            <FlipCard title="Scarcity (FOMO)" icon="🔥" content="Items appear more valuable when availability is limited. Triggers loss aversion." example='"Only 3 left in Size M"' />
+            <FlipCard title="Loss Aversion" icon="📉" content="The pain of losing is psychologically about twice as powerful as the pleasure of gaining." example='"Save ₹1,050" > "20% Off"' />
+            <FlipCard title="Paradox of Choice" icon="😵‍💫" content="Too many choices lead to anxiety and non-action. Limit options to guide decisions." example='Showing 3 "Recommended" products vs 20' />
           </div>
         </section>
+
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 mt-12">
-        <div className="max-w-7xl mx-auto px-6 text-sm">© Arlox — internal dashboard</div>
+      <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
+          <div className="col-span-2">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                <div className="absolute inset-0 border-[2px] border-blue-500 transform rotate-0" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
+              </div>
+              <span className="font-bold text-xl text-white">Arlox<span className="text-blue-500">.io</span></span>
+            </div>
+            <p className="max-w-sm mb-6">Empowering fashion e-commerce brands with data-driven design and optimization strategies.</p>
+            <div className="text-xs text-slate-600">© 2024 Arlox.io. Internal Use Only.</div>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4">Quick Links</h4>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#hub" className="hover:text-blue-400">Navigation Hub</a></li>
+              <li><a href="#roadmap" className="hover:text-blue-400">Roadmap</a></li>
+              <li><a href="#tools" className="hover:text-blue-400">Calculator</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4">Resources</h4>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#" className="hover:text-blue-400">Shopify Theme Store</a></li>
+              <li><a href="#" className="hover:text-blue-400">Baymard Institute</a></li>
+              <li><a href="#" className="hover:text-blue-400">PageSpeed Insights</a></li>
+            </ul>
+          </div>
+        </div>
       </footer>
+
+      {/* Mobile calculator toggle */}
+      <div className="md:hidden fixed bottom-4 right-4 z-50">
+        <button onClick={() => setCalculatorOpen(!calculatorOpen)} className="w-14 h-14 bg-blue-600 rounded-full text-white shadow-2xl flex items-center justify-center">
+          <Calculator size={24} />
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default App;

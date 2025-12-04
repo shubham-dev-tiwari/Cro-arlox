@@ -25,15 +25,15 @@ export const sections = [
 
 // Map of section id -> homepage anchor id (string used after #)
 export const HOME_ANCHORS = {
-  1: "benchmarks",
+  1: "critical-benchmarks",
   2: "homepage-must-haves",
   3: "collection-essentials",
   4: "product-page-power",
   5: "design-principles",
   6: "theme-selection",
   7: "app-stack-roi",
-  8: "trust-badges",
-  9: "elite-strategies"
+  8: "trust-and-badges",
+  9: "elite-strategies",
 };
 
 export default sections;
